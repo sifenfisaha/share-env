@@ -1,15 +1,18 @@
 #!/usr/bin/env node
+import { createRequire } from 'node:module'
 import { Command } from 'commander'
 import { receiveCommand } from './commands/receive.js'
 import { shareCommand } from './commands/share.js'
 import { statusCommand } from './commands/status.js'
+
+const { version } = createRequire(import.meta.url)('../package.json')
 
 const program = new Command()
 
 program
   .name('share-env')
   .description('Securely share .env files with your team through git — encrypted, no server needed.')
-  .version('0.1.0')
+  .version(version)
 
 program
   .command('push')
