@@ -15,23 +15,61 @@ The `.envault` file is safe to commit — even to a public repo. It's encrypted 
 
 ## Install
 
+Since it's not on npm yet, each person installs it from the GitHub repo:
+
 ```bash
+git clone https://github.com/sifenfisaha/share-env.git
+cd share-env
 npm install
 npm run build
-npm link        # makes the `share-env` command available globally
+npm link
 ```
+
+`npm link` makes the `share-env` command available globally. Verify it works:
+
+```bash
+share-env --help
+```
+
+> Both you and your teammate need to do this once. After that, you use `share-env` from inside any of your projects.
 
 ## Usage
 
-Run from anywhere inside a git repo.
+### Step 1 — Share your envs (person who has the secrets)
 
-### `share-env share`
-Scans the whole repo for env files (`.env`, `.env.local`, `.env.production`, …), skipping `node_modules` and friends, and ignoring committable templates like `.env.example`. Asks for a passphrase (twice) and writes `.envault` at the repo root. Commit and push it.
+Go to the project you work on together (any git repo) and run:
+
+```bash
+cd ~/work/my-app
+share-env share
+```
+
+It scans the whole repo for env files (`.env`, `.env.local`, `.env.production`, …), skipping `node_modules` and friends, and ignoring committable templates like `.env.example`. It shows you what it found, asks for a passphrase (twice), and writes one encrypted `.envault` file at the repo root.
 
 It also warns you if any of your env files are tracked by git in plaintext.
 
-### `share-env receive`
-Decrypts `.envault` and places each env file in its original location.
+### Step 2 — Commit and push the vault
+
+```bash
+git add .envault
+git commit -m "share envs"
+git push
+```
+
+The `.envault` file is the only thing that touches git — your actual `.env` files stay ignored and local.
+
+### Step 3 — Send the passphrase to your teammate
+
+Share it **out-of-band**: a password manager, Signal, or in person. Never commit it or paste it in the repo.
+
+### Step 4 — Receive the envs (teammate)
+
+```bash
+git pull
+share-env receive
+```
+
+They enter the same passphrase, and every env file lands in its original location:
 
 - File doesn't exist locally → created.
 - File is identical → skipped.
@@ -51,14 +89,13 @@ Decrypts `.envault` and places each env file in its original location.
    ○ View full file diff
 ```
 
-Any overwrite or merge saves your previous file as `<file>.bak` first.
+Any overwrite or merge saves your previous file as `<file>.bak` first — nothing is ever lost.
 
-### `share-env status`
-Shows each env file as ✓ in sync, ✗ differs, local-only, or missing locally.
+### Ongoing use
 
-## Sharing the passphrase
-
-Share it **out-of-band** — a password manager, Signal, in person. Never commit it or put it in the repo. Everyone on the team uses the same passphrase; to rotate secrets, run `share` again with a new one.
+- Someone changed a secret? They run `share-env share` again (same passphrase), commit the new `.envault`, and push. Everyone else pulls and runs `share-env receive`.
+- `share-env status` shows each env file as ✓ in sync, ✗ differs, local-only, or missing locally.
+- Everyone on the team uses the same passphrase; to rotate secrets, run `share` with a new passphrase and share it out-of-band again.
 
 ## CI / scripting
 
