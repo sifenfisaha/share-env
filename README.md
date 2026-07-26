@@ -120,3 +120,11 @@ SHARE_ENV_KEY="$ENV_PASSPHRASE" share-env pull --yes
 
 - `.env*` should stay in your `.gitignore`; make sure `.envault` is *not* ignored (add `!.envault` if needed). The tool warns about both cases.
 - Aliases: `share-env share` / `share-env receive` work too.
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) to get started. For security issues, please follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
+
+## License
+
+[MIT](LICENSE)
