@@ -1,11 +1,13 @@
 {
-  "name": "envshare",
+  "name": "@sifenfisaha/share-env",
   "version": "0.1.0",
   "description": "Securely share .env files with your team through git — encrypted with a passphrase, no server needed.",
   "type": "module",
   "bin": {
-    "share-env": "dist/index.js",
-    "envshare": "dist/index.js"
+    "share-env": "dist/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",

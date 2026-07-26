@@ -18,10 +18,10 @@ The `.envault` file is safe to commit — even to a public repo. It's encrypted 
 Each person installs it once, globally:
 
 ```bash
-npm install -g envshare
+npm install -g @sifenfisaha/share-env
 ```
 
-This gives you the `share-env` command (`envshare` works too).
+This gives you the `share-env` command.
 
 <details>
 <summary>Or install from source</summary>
