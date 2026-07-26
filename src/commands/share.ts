@@ -67,6 +67,6 @@ export async function shareCommand(opts: { yes?: boolean }): Promise<void> {
 
   p.outro(
     `Now commit and push it:  ${pc.cyan(`git add ${VAULT_FILENAME} && git commit -m "update envs"`)}\n` +
-      `   Your teammate runs ${pc.cyan('share-env receive')} after pulling.`
+      `   Your teammate runs ${pc.cyan('share-env pull')} after pulling.`
   )
 }

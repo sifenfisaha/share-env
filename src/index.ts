@@ -12,15 +12,15 @@ program
   .version('0.1.0')
 
 program
-  .command('share')
-  .alias('push')
+  .command('push')
+  .alias('share')
   .description('Scan the repo for .env files and encrypt them into .envault')
   .option('-y, --yes', 'skip confirmation prompts')
   .action(shareCommand)
 
 program
-  .command('receive')
-  .alias('pull')
+  .command('pull')
+  .alias('receive')
   .description('Decrypt .envault and place env files where they belong')
   .option('-y, --yes', 'non-interactive: incoming wins, local files backed up as .bak')
   .action(receiveCommand)

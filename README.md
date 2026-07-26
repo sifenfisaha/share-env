@@ -5,8 +5,8 @@ Securely share `.env` files with your team **through git** — encrypted with a 
 ```
 you                                     teammate
 ───                                     ────────
-share-env share                         git pull
-  ↳ finds every .env in the repo        share-env receive
+share-env push                          git pull
+  ↳ finds every .env in the repo        share-env pull
   ↳ encrypts them into .envault           ↳ enters the same passphrase
 git add .envault && git push              ↳ every .env lands where it belongs
 ```
@@ -52,7 +52,7 @@ Go to the project you work on together (any git repo) and run:
 
 ```bash
 cd ~/work/my-app
-share-env share
+share-env push
 ```
 
 It scans the whole repo for env files (`.env`, `.env.local`, `.env.production`, …), skipping `node_modules` and friends, and ignoring committable templates like `.env.example`. It shows you what it found, asks for a passphrase (twice), and writes one encrypted `.envault` file at the repo root.
@@ -77,7 +77,7 @@ Share it **out-of-band**: a password manager, Signal, or in person. Never commit
 
 ```bash
 git pull
-share-env receive
+share-env pull
 ```
 
 They enter the same passphrase, and every env file lands in its original location:
@@ -104,19 +104,19 @@ Any overwrite or merge saves your previous file as `<file>.bak` first — nothin
 
 ### Ongoing use
 
-- Someone changed a secret? They run `share-env share` again (same passphrase), commit the new `.envault`, and push. Everyone else pulls and runs `share-env receive`.
+- Someone changed a secret? They run `share-env push` again (same passphrase), commit the new `.envault`, and push. Everyone else pulls and runs `share-env pull`.
 - `share-env status` shows each env file as ✓ in sync, ✗ differs, local-only, or missing locally.
-- Everyone on the team uses the same passphrase; to rotate secrets, run `share` with a new passphrase and share it out-of-band again.
+- Everyone on the team uses the same passphrase; to rotate secrets, run `push` with a new passphrase and share it out-of-band again.
 
 ## CI / scripting
 
 Set `SHARE_ENV_KEY` to skip the passphrase prompt, and `--yes` to skip confirmations (on conflicts, incoming wins and locals are backed up as `.bak`):
 
 ```bash
-SHARE_ENV_KEY="$ENV_PASSPHRASE" share-env receive --yes
+SHARE_ENV_KEY="$ENV_PASSPHRASE" share-env pull --yes
 ```
 
 ## Notes
 
 - `.env*` should stay in your `.gitignore`; make sure `.envault` is *not* ignored (add `!.envault` if needed). The tool warns about both cases.
-- Aliases: `share-env push` / `share-env pull` work too.
+- Aliases: `share-env share` / `share-env receive` work too.

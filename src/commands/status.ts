@@ -18,7 +18,7 @@ export async function statusCommand(): Promise<void> {
     process.exit(1)
   }
   if (!vaultExists(root)) {
-    p.cancel(`No ${VAULT_FILENAME} in this repo yet — run ${pc.cyan('share-env share')} to create one.`)
+    p.cancel(`No ${VAULT_FILENAME} in this repo yet — run ${pc.cyan('share-env push')} to create one.`)
     process.exit(1)
   }
 
@@ -58,6 +58,6 @@ export async function statusCommand(): Promise<void> {
   }
 
   p.outro(
-    `${pc.cyan('share-env share')} to update the vault · ${pc.cyan('share-env receive')} to apply it`
+    `${pc.cyan('share-env push')} to update the vault · ${pc.cyan('share-env pull')} to apply it`
   )
 }

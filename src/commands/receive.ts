@@ -21,7 +21,7 @@ export async function receiveCommand(opts: { yes?: boolean }): Promise<void> {
   }
   if (!vaultExists(root)) {
     p.cancel(
-      `No ${VAULT_FILENAME} found. Pull the latest changes, or ask your teammate to run ${pc.cyan('share-env share')} first.`
+      `No ${VAULT_FILENAME} found. Pull the latest changes, or ask your teammate to run ${pc.cyan('share-env push')} first.`
     )
     process.exit(1)
   }
