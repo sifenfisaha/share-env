@@ -15,7 +15,16 @@ The `.envault` file is safe to commit — even to a public repo. It's encrypted 
 
 ## Install
 
-Since it's not on npm yet, each person installs it from the GitHub repo:
+Each person installs it once, globally:
+
+```bash
+npm install -g envshare
+```
+
+This gives you the `share-env` command (`envshare` works too).
+
+<details>
+<summary>Or install from source</summary>
 
 ```bash
 git clone https://github.com/sifenfisaha/share-env.git
@@ -25,7 +34,9 @@ npm run build
 npm link
 ```
 
-`npm link` makes the `share-env` command available globally. Verify it works:
+</details>
+
+Verify it works:
 
 ```bash
 share-env --help
