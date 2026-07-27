@@ -4,6 +4,26 @@ export const metadata = { title: 'Commands' }
 
 Full reference for every command and flag. `push`/`pull` also answer to their old names `share`/`receive`.
 
+## share-env init
+
+One-command setup for a new project. Run it at the repo root and it does the whole first step:
+
+```bash
+share-env init [options]
+```
+
+1. Creates your identity if this machine doesn't have one (otherwise reuses it) and prints your public key.
+2. Adds you to `.envkeys` if you're not in it.
+3. Fixes `.gitignore`: ignores `.env*`, un-ignores `.envault` and `.envkeys`.
+4. Lists the env files a push would pick up.
+
+| Flag | Effect |
+| --- | --- |
+| `-n, --name <name>` | your name in `.envkeys` (defaults to your git user name) |
+| `-y, --yes` | non-interactive: use defaults |
+
+Safe to re-run anytime; it only fills in whatever is missing.
+
 ## share-env push
 
 Scan the repo for env files and encrypt them into `.envault` for every key in `.envkeys`.

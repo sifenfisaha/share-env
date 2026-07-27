@@ -13,7 +13,7 @@ import {
 import { addRecipient, ENVKEYS_FILENAME, readRecipients } from '../lib/recipients.js'
 import { trustKeys } from '../lib/trust.js'
 
-function defaultName(): string {
+export function defaultName(): string {
   try {
     const name = execFileSync('git', ['config', 'user.name'], { encoding: 'utf8' }).trim()
     if (name) return name.toLowerCase().replace(/\s+/g, '-')

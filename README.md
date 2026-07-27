@@ -24,9 +24,9 @@ npm install -g @sifenfisaha/share-env
 ## Quick start
 
 ```bash
-share-env keygen     # once per machine, prints your public key
+share-env init       # identity + roster + .gitignore rules, in one command
 share-env push       # encrypt every .env in the repo into .envault
-git add .envault .envkeys && git commit -m "share envs" && git push
+git add .envault .envkeys .gitignore && git commit -m "share envs" && git push
 ```
 
 Your teammate:

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { createRequire } from 'node:module'
 import { Command } from 'commander'
+import { initCommand } from './commands/init.js'
 import { keygenCommand } from './commands/keygen.js'
 import { keysAddCommand, keysListCommand, keysRemoveCommand } from './commands/keys.js'
 import { receiveCommand } from './commands/receive.js'
@@ -15,6 +16,13 @@ program
   .name('share-env')
   .description('Securely share .env files with your team through git — encrypted, no server needed.')
   .version(version)
+
+program
+  .command('init')
+  .description('Set up share-env in this repo: identity, roster entry, .gitignore rules')
+  .option('-n, --name <name>', 'your name in .envkeys')
+  .option('-y, --yes', 'non-interactive: use defaults')
+  .action(initCommand)
 
 program
   .command('push')
