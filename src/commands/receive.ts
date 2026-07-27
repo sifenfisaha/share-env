@@ -2,11 +2,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import * as p from '@clack/prompts'
 import pc from 'picocolors'
-import { WrongPassphraseError } from '../lib/crypto.js'
 import { buildMerged, diffEnv, parseEnv, type EnvDiff } from '../lib/env.js'
 import { findRepoRoot } from '../lib/git.js'
-import { askPassphrase } from '../lib/passphrase.js'
-import { openVault, VAULT_FILENAME, vaultExists, type VaultPayload } from '../lib/vault.js'
+import { openVaultInteractive } from '../lib/open.js'
+import { VAULT_FILENAME, vaultExists } from '../lib/vault.js'
 import { plural, renderEnvDiff, renderFileDiff, truncate } from '../lib/ui.js'
 
 type FileAction = 'created' | 'updated' | 'merged' | 'kept' | 'unchanged'
@@ -26,29 +25,9 @@ export async function receiveCommand(opts: { yes?: boolean }): Promise<void> {
     process.exit(1)
   }
 
-  let payload: VaultPayload | null = null
-  for (let attempt = 1; attempt <= 3 && !payload; attempt++) {
-    const passphrase = await askPassphrase('Enter the passphrase your teammate used')
-    const s = p.spinner()
-    s.start('Decrypting vault')
-    try {
-      payload = openVault(root, passphrase)
-      s.stop('Vault decrypted')
-    } catch (err) {
-      if (err instanceof WrongPassphraseError) {
-        s.stop(pc.red('Wrong passphrase'), 1)
-        if (process.env.SHARE_ENV_KEY || attempt === 3) {
-          p.cancel('Could not decrypt the vault.')
-          process.exit(1)
-        }
-      } else {
-        s.stop(pc.red('Failed'), 1)
-        throw err
-      }
-    }
-  }
+  const payload = await openVaultInteractive(root)
 
-  const entries = Object.entries(payload!.files)
+  const entries = Object.entries(payload.files)
   p.log.info(`Vault contains ${plural(entries.length, 'env file')}`)
 
   const summary: Record<FileAction, string[]> = {

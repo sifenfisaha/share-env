@@ -25,7 +25,17 @@ Things that are out of scope:
 
 ## Design notes for reviewers
 
+Recipient-key vaults (v2, the default):
+
+- Envelope encryption: each push generates a fresh random 256-bit data key that encrypts the payload with AES-256-GCM (12-byte random IV, tag verified on decrypt)
+- The data key is wrapped per recipient: fresh ephemeral X25519 keypair per recipient per push, ECDH against the recipient's public key, HKDF-SHA256 (salt = ephemeral pub || recipient pub, info = "share-env/v2/wrap") derives the AES-256-GCM wrapping key
+- Private identity keys live at `~/.config/share-env/identity` with mode 600 and are never written to the repo
+- The envelope reveals only recipient names and public keys; all file paths and contents live inside the encrypted payload
+- Known accepted property: vaults in git history remain decryptable by keys that were recipients at the time; offboarding therefore requires rotating the underlying secrets, as documented in the README
+
+Passphrase vaults (v1, legacy `--passphrase` mode):
+
 - Key derivation: scrypt with N=2^17, r=8, p=1, 16-byte random salt per vault
 - Encryption: AES-256-GCM with a 12-byte random IV per vault, auth tag verified on decrypt
-- Only Node.js built-in crypto is used; there are no third-party cryptography dependencies
-- The `.envault` envelope stores kdf parameters, salt, IV, tag, and ciphertext; all file paths and contents live inside the encrypted payload
+
+Both modes use only Node.js built-in crypto; there are no third-party cryptography dependencies.

@@ -2,12 +2,11 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as p from '@clack/prompts'
 import pc from 'picocolors'
-import { WrongPassphraseError } from '../lib/crypto.js'
 import { diffEnv, parseEnv } from '../lib/env.js'
 import { findRepoRoot } from '../lib/git.js'
-import { askPassphrase } from '../lib/passphrase.js'
+import { openVaultInteractive } from '../lib/open.js'
 import { findEnvFiles } from '../lib/scan.js'
-import { openVault, readEnvelope, VAULT_FILENAME, vaultExists } from '../lib/vault.js'
+import { readEnvelope, VAULT_FILENAME, vaultExists } from '../lib/vault.js'
 
 export async function statusCommand(): Promise<void> {
   p.intro(pc.bgCyan(pc.black(' share-env ')))
@@ -23,19 +22,13 @@ export async function statusCommand(): Promise<void> {
   }
 
   const envelope = readEnvelope(root)
-  p.log.info(`Vault last updated ${pc.cyan(new Date(envelope.createdAt).toLocaleString())}`)
+  const mode =
+    envelope.version === 2
+      ? `encrypted to ${envelope.recipients.length} recipient key(s)`
+      : 'passphrase-encrypted (legacy)'
+  p.log.info(`Vault last updated ${pc.cyan(new Date(envelope.createdAt).toLocaleString())} · ${mode}`)
 
-  const passphrase = await askPassphrase('Passphrase to inspect the vault')
-  let payload
-  try {
-    payload = openVault(root, passphrase)
-  } catch (err) {
-    if (err instanceof WrongPassphraseError) {
-      p.cancel(err.message)
-      process.exit(1)
-    }
-    throw err
-  }
+  const payload = await openVaultInteractive(root)
 
   const vaultFiles = new Set(Object.keys(payload.files))
   const localFiles = new Set(findEnvFiles(root))

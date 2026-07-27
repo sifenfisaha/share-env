@@ -49,15 +49,18 @@ Open an issue at https://github.com/sifenfisaha/share-env/issues with steps to r
 ```
 src/
   index.ts           command definitions (commander)
-  commands/          push, pull, status
+  commands/          push, pull, status, keygen, keys
   lib/
-    crypto.ts        scrypt + AES-256-GCM (Node built-ins only)
-    vault.ts         .envault file format
+    crypto.ts        v2 envelope crypto (X25519+HKDF+AES-GCM) and v1 scrypt mode
+    identity.ts      keypair generation, encoding, identity file handling
+    recipients.ts    the .envkeys roster format
+    vault.ts         .envault file format (v1 and v2)
+    open.ts          decrypt-any-vault helper used by pull and status
     scan.ts          finding .env files in the repo
     env.ts           parsing, diffing, merging env files
     git.ts           repo root, tracked files, ignore checks
     ui.ts            diff rendering helpers
-    passphrase.ts    prompts
+    passphrase.ts    prompts for legacy passphrase mode
 ```
 
 One rule that matters: the crypto stays on Node built-ins. Please don't add third-party cryptography dependencies.
