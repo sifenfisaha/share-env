@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { DocSearch } from '@/components/doc-search'
 import { Faq } from '@/components/faq'
 import { HeroArt } from '@/components/hero-art'
+import { InstallCommand } from '@/components/install-command'
 import { SiteNav } from '@/components/site-nav'
 import { docs, GITHUB_URL, NPM_URL } from '@/lib/docs-index'
 
@@ -25,9 +26,9 @@ export default function Home() {
             <div className="mt-8">
               <DocSearch />
             </div>
-            <p className="mt-6 break-all px-2 font-mono text-[11px] text-neutral-500 sm:break-normal sm:text-xs">
-              npm install -g @sifenfisaha/share-env
-            </p>
+            <div className="mt-6">
+              <InstallCommand />
+            </div>
           </div>
         </section>
 
