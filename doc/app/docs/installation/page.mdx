@@ -1,3 +1,5 @@
+import { InstallTabs } from '@/components/install-command'
+
 export const metadata = { title: 'Installation' }
 
 # Installation
@@ -9,11 +11,11 @@ share-env is a single npm package that installs a global `share-env` command.
 - Node.js 18 or newer
 - git (the tool runs inside git repositories)
 
-## Install with npm
+## Install
 
-```bash
-npm install -g @sifenfisaha/share-env
-```
+Any package manager works — they all pull the same package from the npm registry, and the CLI always runs under Node either way:
+
+<InstallTabs />
 
 Verify it works:
 
