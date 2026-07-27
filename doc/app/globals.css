@@ -1,0 +1,166 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', monospace;
+}
+
+::selection {
+  background: #fff;
+  color: #000;
+}
+
+/* ---------- custom scrollbar ---------- */
+
+html {
+  scrollbar-width: thin; /* firefox */
+  scrollbar-color: #3f3f3f transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f3f;
+  border-radius: 999px;
+  border: 3px solid #0a0a0a; /* matches bg-neutral-950 so the thumb looks inset */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #737373;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+/* slimmer bars inside code blocks and other scroll containers */
+.prose pre::-webkit-scrollbar,
+.drawer-nav::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.prose pre::-webkit-scrollbar-thumb {
+  border: 0;
+  background: #404040;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- search modal ---------- */
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.modal-overlay {
+  animation: overlay-in 0.15s ease;
+}
+.modal-panel {
+  animation: panel-in 0.2s ease;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.drawer-panel {
+  animation: drawer-in 0.2s ease-out;
+}
+
+/* ---------- docs prose ---------- */
+
+.prose {
+  @apply text-neutral-300 leading-relaxed;
+}
+.prose > * + * {
+  margin-top: 1rem;
+}
+.prose h1 {
+  @apply text-3xl font-semibold tracking-tight text-white mt-0;
+}
+.prose h2 {
+  @apply text-xl font-semibold tracking-tight text-white border-b border-neutral-800 pb-2;
+  margin-top: 2.5rem;
+}
+.prose h3 {
+  @apply text-base font-semibold text-white;
+  margin-top: 2rem;
+}
+.prose a {
+  @apply text-white underline decoration-neutral-600 underline-offset-4 hover:decoration-white transition-colors;
+}
+.prose strong {
+  @apply text-white font-semibold;
+}
+.prose ul {
+  @apply list-disc pl-5 space-y-1.5;
+}
+.prose ol {
+  @apply list-decimal pl-5 space-y-1.5;
+}
+.prose code {
+  @apply font-mono text-[13px] text-white bg-white/5 border border-white/10 rounded px-1.5 py-0.5;
+}
+.prose pre {
+  @apply bg-black text-neutral-100 rounded-xl p-4 overflow-x-auto text-[13px] leading-relaxed border border-neutral-800;
+}
+.prose pre code {
+  @apply bg-transparent border-0 p-0 text-inherit;
+}
+.prose blockquote {
+  @apply border-l-2 border-white pl-4 text-neutral-400;
+}
+.prose table {
+  @apply w-full text-sm border-collapse;
+}
+@media (max-width: 640px) {
+  /* wide reference tables scroll instead of breaking the layout */
+  .prose table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+.prose th {
+  @apply text-left font-semibold text-white border-b border-neutral-700 py-2 pr-4;
+}
+.prose td {
+  @apply border-b border-neutral-800 py-2 pr-4 align-top;
+}
+.prose hr {
+  @apply border-neutral-800;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}

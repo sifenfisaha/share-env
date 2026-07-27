@@ -1,0 +1,46 @@
+export const metadata = { title: 'Installation' }
+
+# Installation
+
+share-env is a single npm package that installs a global `share-env` command.
+
+## Requirements
+
+- Node.js 18 or newer
+- git (the tool runs inside git repositories)
+
+## Install with npm
+
+```bash
+npm install -g @sifenfisaha/share-env
+```
+
+Verify it works:
+
+```bash
+share-env --help
+```
+
+Every teammate installs it the same way, once per machine.
+
+## Install from source
+
+```bash
+git clone https://github.com/sifenfisaha/share-env.git
+cd share-env
+npm install
+npm run build
+npm link
+```
+
+`npm link` makes your local build available globally, which is handy when contributing.
+
+## Updating
+
+```bash
+npm install -g @sifenfisaha/share-env
+```
+
+The same command always installs the latest published version. Vault formats are backward compatible: newer CLIs open older vaults.
+
+Next: [Getting started](/docs/getting-started).

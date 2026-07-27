@@ -1,0 +1,77 @@
+export const metadata = { title: 'Team setup' }
+
+# Team setup
+
+A concrete walkthrough: you plus five teammates (Sara, Dawit, Hana, Yonas, and Lidya) on a repo called `my-app`.
+
+## Phase 1: everyone installs and creates a key
+
+Each person, once ever, on their own machine:
+
+```bash
+npm install -g @sifenfisaha/share-env
+share-env keygen
+```
+
+Each teammate sends you their printed `sepk_...` public key however they like. The group chat is fine: it is a public key, revealing it costs nothing.
+
+## Phase 2: build the roster and push
+
+Just you, once:
+
+```bash
+cd ~/work/my-app
+share-env keys add sara  sepk_saraskey...
+share-env keys add dawit sepk_dawitskey...
+share-env keys add hana  sepk_hanaskey...
+share-env keys add yonas sepk_yonaskey...
+share-env keys add lidya sepk_lidyaskey...
+
+share-env keys       # lists all six names, with "(you)" next to yours
+
+share-env push
+git add .envault .envkeys
+git commit -m "share envs with the team"
+git push
+```
+
+`.envkeys` is a plain-text roster of names and public keys. It is safe to commit and doubles as your access list.
+
+## Phase 3: everyone pulls
+
+Each teammate:
+
+```bash
+cd my-app
+git pull
+share-env pull
+```
+
+Done. No passphrase, and every `.env` appears exactly where it belongs.
+
+## Daily life
+
+- Someone changes a secret: they `push`, commit, push. Everyone else `git pull && share-env pull`.
+- Not sure if you're current? `share-env status`.
+- Second laptop? Run `keygen` there and get the new key added under the same name. Multiple keys per person are supported.
+
+## Offboarding
+
+When Lidya leaves:
+
+```bash
+share-env keys remove lidya
+```
+
+Then rotate the real secrets she knew (database password, API keys) in your `.env` files, and:
+
+```bash
+share-env push
+git add .envault .envkeys && git commit -m "offboard lidya" && git push
+```
+
+From that push on her key opens nothing. Rotation matters because old commits remain readable to her old key; fresh secrets make that history worthless.
+
+## Onboarding via pull request
+
+Instead of collecting keys in chat, teammates can add themselves to `.envkeys` in a PR. You review, merge, run `share-env push`, and the PR history becomes your audit log of who got access and when. `push` will still ask you to confirm any key that was not added on your machine; see the [security model](/docs/security).

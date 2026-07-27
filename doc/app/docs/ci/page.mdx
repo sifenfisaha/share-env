@@ -1,0 +1,70 @@
+export const metadata = { title: 'CI & automation' }
+
+# CI & automation
+
+CI is just another teammate: it gets its own identity, its own line in the roster, and it can be revoked without touching anyone else.
+
+## 1. Create an identity for CI
+
+On any trusted machine:
+
+```bash
+share-env keygen --force   # or in a scratch HOME so you don't touch your own identity
+```
+
+You need the two halves it produces: the public key (`sepk_...`) that goes in the roster, and the secret key from `~/.config/share-env/identity` (a `sesk_...` string) that becomes a CI secret.
+
+## 2. Add CI to the roster
+
+```bash
+share-env keys add ci sepk_thecikey...
+share-env push
+git add .envault .envkeys && git commit -m "grant ci access" && git push
+```
+
+## 3. Store the secret and pull in the pipeline
+
+Save the `sesk_...` string as a CI secret (for example `SHARE_ENV_IDENTITY` in GitHub Actions), then:
+
+```bash
+SHARE_ENV_IDENTITY="$SHARE_ENV_IDENTITY" share-env pull --yes
+```
+
+`--yes` makes it non-interactive: incoming always wins and any existing local files are backed up as `.bak`.
+
+## GitHub Actions example
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g @sifenfisaha/share-env
+      - run: share-env pull --yes
+        env:
+          SHARE_ENV_IDENTITY: ${{ secrets.SHARE_ENV_IDENTITY }}
+      - run: npm ci && npm test
+```
+
+## Revoking CI
+
+Same as any teammate:
+
+```bash
+share-env keys remove ci
+share-env push
+```
+
+Rotate the secrets it had access to if the CI environment may have been compromised.
+
+## Legacy passphrase vaults
+
+If the vault was created with `push --passphrase`, use the passphrase variable instead:
+
+```bash
+SHARE_ENV_KEY="$ENV_PASSPHRASE" share-env pull --yes
+```

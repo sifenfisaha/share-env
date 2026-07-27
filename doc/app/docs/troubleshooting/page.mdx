@@ -1,0 +1,67 @@
+export const metadata = { title: 'Troubleshooting' }
+
+# Troubleshooting
+
+The errors you might hit, what they actually mean, and the fix.
+
+## "This vault is encrypted to team member keys, but this machine has no identity yet"
+
+You've never run `keygen` on this machine. Fix:
+
+```bash
+share-env keygen
+```
+
+Then send the printed public key to a teammate, have them `keys add` you and `push`, then `git pull && share-env pull`.
+
+## "Your key is not a recipient of this vault"
+
+Your identity exists but the current vault wasn't encrypted to it. The error prints your public key so you can copy it straight to a teammate. After they add you and push, pull again. This is also what former teammates see after being removed: that part is working as intended.
+
+## "1 key in .envkeys was not added on this machine"
+
+`push` found a roster key that was never approved locally: it may have arrived via a merged PR. If you know who it is (say, you just merged their onboarding PR), confirm. If you don't recognize it, decline and investigate:
+
+```bash
+share-env keys          # see the roster
+share-env keys remove <name>
+```
+
+## "No .envault found"
+
+Either you haven't pulled the latest commits, or nobody has pushed a vault yet. Run `git pull` first, or `share-env push` if you're the one with the secrets.
+
+## "Wrong passphrase (or the vault file was tampered with)"
+
+Legacy passphrase vaults only: the passphrase doesn't match, or the file was corrupted (for example by a bad merge). Get the exact passphrase from whoever pushed, or have them re-push.
+
+## ".envault is currently ignored by .gitignore"
+
+A broad pattern like `.env*` is catching the vault. Add explicit exceptions:
+
+```
+.env*
+!.envault
+!.envkeys
+```
+
+## A conflict resolved the wrong way
+
+Every overwrite and merge writes your previous file to `<file>.bak` first:
+
+```bash
+mv .env.bak .env
+```
+
+## npm install fails with EEXIST on the share-env bin
+
+A leftover from an old `npm link` during development. Remove the stale link and reinstall:
+
+```bash
+npm uninstall -g share-env
+npm install -g @sifenfisaha/share-env
+```
+
+## Something else?
+
+Open an issue with steps to reproduce: [github.com/sifenfisaha/share-env/issues](https://github.com/sifenfisaha/share-env/issues). For anything security-related, use the [security policy](https://github.com/sifenfisaha/share-env/blob/main/SECURITY.md) instead.

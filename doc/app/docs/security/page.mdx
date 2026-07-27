@@ -1,0 +1,56 @@
+export const metadata = { title: 'Security model' }
+
+# Security model
+
+Everything here uses only Node's built-in `crypto` module. There are no third-party cryptography dependencies to audit or supply-chain-attack.
+
+## Envelope encryption
+
+Every `push` does the following:
+
+1. Generates a fresh random 256-bit **data key**, never stored or reused.
+2. Encrypts the payload (all your env files) with **AES-256-GCM** under that data key.
+3. For each recipient in `.envkeys`, wraps the data key: a fresh ephemeral **X25519** keypair performs a Diffie-Hellman exchange with the recipient's public key, **HKDF-SHA256** derives a wrapping key, and the data key is AES-GCM-encrypted with it.
+
+The result is one `.envault` file containing the ciphertext plus one sealed copy of the data key per teammate. Only a recipient's private key can unwrap their copy. This is the same model used by age, SOPS, and TLS.
+
+## What an attacker sees
+
+A public repo exposes `.envault` and `.envkeys`. That gives them:
+
+- recipient names and public keys (public by design)
+- ciphertext with no passphrase to guess: the data key is 256 random bits
+
+GCM authentication means a tampered vault fails loudly instead of decrypting to garbage.
+
+## The roster is not the lock
+
+Adding a key to `.envkeys` grants nothing by itself. Secrets only reach a new key when a teammate who already has them runs `push`. On top of that, `push` keeps a trust store at `.git/share-env-trusted-keys`: local-only, never committed, unreachable by any pull request. Keys you add via `keys add` or `keygen` are approved automatically; a key that arrived any other way triggers this:
+
+```
+▲  1 key in .envkeys was not added on this machine:
+     mallory  sepk_H5DODcjon…
+◆  Encrypt to this new key?  ○ no
+```
+
+Non-interactive runs refuse unapproved keys unless `--yes` is passed explicitly.
+
+## Threat model honesty
+
+In scope and defended:
+
+- offline brute force (no passphrase exists; legacy mode uses scrypt at N=2^17)
+- vault tampering (GCM auth), roster injection (local trust store)
+- per-person revocation with a git audit trail
+
+Out of scope, like every tool in this category:
+
+- a compromised teammate machine leaks what that teammate could read
+- former members can decrypt **old** vaults from git history, which is why offboarding includes rotating the underlying secrets
+- verifying a public key really belongs to its claimed owner is a human step (a PR from their own account does this naturally)
+
+## Legacy passphrase mode
+
+`push --passphrase` encrypts with scrypt (N=2^17, r=8, p=1, per-vault random salt) + AES-256-GCM. Memory-hard derivation makes GPU brute force expensive, but the vault is only as strong as the passphrase, which is why key mode is the default.
+
+Found a vulnerability? Please follow the [security policy](https://github.com/sifenfisaha/share-env/blob/main/SECURITY.md) instead of opening a public issue.

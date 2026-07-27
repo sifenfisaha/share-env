@@ -1,0 +1,78 @@
+export const metadata = { title: 'Commands' }
+
+# Commands
+
+Full reference for every command and flag. `push`/`pull` also answer to their old names `share`/`receive`.
+
+## share-env push
+
+Scan the repo for env files and encrypt them into `.envault` for every key in `.envkeys`.
+
+```bash
+share-env push [options]
+```
+
+| Flag | Effect |
+| --- | --- |
+| `-y, --yes` | skip confirmation prompts |
+| `-p, --passphrase` | legacy mode: encrypt with a shared passphrase instead of keys |
+
+What it scans: any file named `.env` or `.env.*` in the repo, recursively. What it skips: `node_modules`, `.git`, build output folders, and template suffixes (`.example`, `.sample`, `.template`, `.dist`, `.bak`).
+
+Safety checks on every push: warns about env files tracked by git in plaintext, warns if `.gitignore` would block the vault or roster from being committed, warns if your own key is missing from the roster, and requires confirmation for roster keys that were never approved on this machine.
+
+## share-env pull
+
+Decrypt `.envault` and place every env file in its original location.
+
+```bash
+share-env pull [options]
+```
+
+| Flag | Effect |
+| --- | --- |
+| `-y, --yes` | non-interactive: incoming wins, local files backed up as `.bak` |
+
+Per-file behavior: missing files are created, identical files are skipped, and differing files open the per-variable conflict UI (merge key by key, take incoming, keep local, or view the full diff). Every overwrite or merge writes a `.bak` of your previous file first.
+
+## share-env status
+
+Compare local env files against the vault.
+
+```bash
+share-env status
+```
+
+Output per file: `✓ in sync`, `✗ differs (n variables)`, `+ local only, not shared yet`, or `◌ in vault, missing locally`.
+
+## share-env keygen
+
+Create this machine's identity keypair.
+
+```bash
+share-env keygen [options]
+```
+
+| Flag | Effect |
+| --- | --- |
+| `-f, --force` | replace an existing identity (the old one can no longer decrypt) |
+| `-n, --name <name>` | add yourself to `.envkeys` under this name without prompting |
+
+The identity is stored at `~/.config/share-env/identity` with file mode 600.
+
+## share-env keys
+
+Manage who can decrypt the vault.
+
+```bash
+share-env keys                       # list recipients, marks your own key
+share-env keys add <name> <pubkey>   # onboard a teammate
+share-env keys remove <name>         # offboard (then rotate secrets and push)
+```
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `SHARE_ENV_IDENTITY` | secret key for CI / non-interactive pulls (key mode) |
+| `SHARE_ENV_KEY` | passphrase for CI with legacy passphrase vaults |

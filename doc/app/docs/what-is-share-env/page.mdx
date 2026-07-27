@@ -1,0 +1,69 @@
+export const metadata = { title: 'What is share-env?' }
+
+# What is share-env?
+
+share-env is a CLI that lets your team share `.env` files **through git**, encrypted. No server to host, no service to sign up for, and since v0.2 no shared passphrase either: each teammate has their own key, like SSH.
+
+```
+you                                     teammate
+───                                     ────────
+share-env push                          git pull
+  ↳ finds every .env in the repo        share-env pull
+  ↳ encrypts them into .envault           ↳ decrypts with their own key
+git add .envault && git push              ↳ every .env lands where it belongs
+```
+
+## The problem it solves
+
+Every team does one of these, and they are all bad:
+
+- pasting env vars in the group chat, then copy-pasting them into the right files by hand
+- a "secrets" doc that is always out of date
+- one person who "has the good .env" and gets pinged constantly
+
+share-env replaces all of that with two commands. `push` scans the whole repo for env files (even in subfolders), encrypts them into a single `.envault` file you commit like normal code. `pull` puts every file back exactly where it belongs on your teammate's machine, with a per-variable merge UI when their local copy differs.
+
+## Why git as the transport?
+
+Your team already has a repo, permissions, and history. The encrypted vault rides along with the code, so:
+
+- there is nothing extra to host or pay for
+- access to the repo does not mean access to the secrets (the vault is ciphertext)
+- git history doubles as an audit log of every secrets change
+
+## How the entire thing works
+
+The mental model: every teammate has a personal **padlock and key**. The padlock (public key) can be handed out freely, even published; it can only lock things. The key (private key) never leaves that person's machine and is the only thing that can unlock their padlock.
+
+### 1. Everyone creates an identity, once
+
+`share-env keygen` generates an X25519 keypair. The private half lands in `~/.config/share-env/identity` and stays there forever. The public half is a short `sepk_...` string that teammates paste into `.envkeys`, the plain-text roster committed to the repo:
+
+```
+# who can decrypt the next share-env push
+alice: sepk_b0e5LGEgeNU0RvWLUanGiGwHGnsDOZYhXEBeH2SSsWc
+bob:   sepk_s3KPSc3NjwD3CTaNUzVJ2O2TgvKlFHALUcxWO4XBAkY
+```
+
+### 2. push builds the vault
+
+When you run `share-env push`, four things happen:
+
+1. **Scan.** The repo is walked recursively for env files (`.env`, `.env.local`, ...), skipping `node_modules`, build folders, and committable templates like `.env.example`.
+2. **Encrypt once.** A brand new random 256-bit **data key** is generated for this push and encrypts all the file contents with AES-256-GCM. The data key is never stored and never reused.
+3. **Wrap per teammate.** For every key in `.envkeys`, a copy of the data key is sealed so only that teammate's private key can open it (X25519 key exchange + HKDF). Think of it as putting the crate's combination inside each person's locked mailbox.
+4. **Write.** Everything lands in one file, `.envault`: the ciphertext plus one sealed key-copy per teammate. You commit it and push, and git does the delivery.
+
+An attacker reading the repo sees names, public keys, and ciphertext. There is no passphrase to guess: the data key is 256 random bits.
+
+### 3. pull opens it
+
+Your teammate runs `share-env pull`. The tool finds their private key, locates their sealed copy of the data key inside the vault, unwraps it, decrypts the payload, and writes every env file back to its original path, even in subfolders. If a local file differs, they resolve it variable by variable in the terminal; overwrites always save a `.bak` first.
+
+### 4. Access changes are just roster edits
+
+Onboarding is `share-env keys add <name> <pubkey>` and a push: the next vault includes a sealed copy for them. Offboarding is `keys remove` plus rotating the secrets they knew: the next vault simply has no copy for their key anymore. Nothing gets re-shared out-of-band, and git history records every change to who had access.
+
+The full command reference lives in [Commands](/docs/commands), and the crypto details in the [security model](/docs/security).
+
+Next: [Installation](/docs/installation), then [Getting started](/docs/getting-started).

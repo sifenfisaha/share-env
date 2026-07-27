@@ -1,0 +1,73 @@
+export const metadata = { title: 'Getting started' }
+
+# Getting started
+
+Five minutes from zero to your first encrypted vault.
+
+## 1. Create your key
+
+```bash
+share-env keygen
+```
+
+This creates an identity at `~/.config/share-env/identity` and prints your public key:
+
+```
+Your public key (safe to share anywhere):
+sepk_b0e5LGEgeNU0RvWLUanGiGwHGnsDOZYhXEBeH2SSsWc
+```
+
+The private half never leaves your machine. The `sepk_...` public half is like an email address: you can post it anywhere. If you run `keygen` inside a repo, it offers to add you to the team roster (`.envkeys`) right away.
+
+## 2. Push your envs
+
+From anywhere inside your project:
+
+```bash
+share-env push
+```
+
+It scans the repo for env files (`.env`, `.env.local`, `.env.production`, ...), skips `node_modules` and committable templates like `.env.example`, shows you the list, and writes one encrypted `.envault` file at the repo root. It also warns you if any env file is tracked by git in plaintext.
+
+## 3. Commit the vault
+
+```bash
+git add .envault .envkeys
+git commit -m "share envs"
+git push
+```
+
+That's the entire hosting story. The vault is ciphertext, safe even in a public repo.
+
+## 4. Pull on another machine
+
+On your laptop, a teammate's machine, or a fresh clone:
+
+```bash
+git pull
+share-env pull
+```
+
+No passphrase. Your key opens the vault and every env file lands exactly where it was, including subfolders. If a local file differs you get a per-variable diff:
+
+```
+◇  .env differs from the vault
+│
+│  + NEW_KEY        new from vault
+│  ~ DATABASE_URL   postgres://…/local → postgres://…/dev
+│  - MY_ONLY        only in your local file
+│
+◆  How should .env be resolved?
+```
+
+Choose merge per variable, take incoming, keep local, or view the full diff. Overwrites always save a `.bak` first.
+
+## 5. Check the state anytime
+
+```bash
+share-env status
+```
+
+Shows every env file as in sync, differing, local-only, or missing.
+
+Next: onboard your teammates in [Team setup](/docs/team-setup).
