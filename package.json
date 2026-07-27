@@ -1,6 +1,6 @@
 {
   "name": "@sifenfisaha/share-env",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Securely share .env files with your team through git — encrypted with a passphrase, no server needed.",
   "type": "module",
   "bin": {
