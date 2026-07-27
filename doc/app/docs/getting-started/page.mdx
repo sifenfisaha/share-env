@@ -4,22 +4,22 @@ export const metadata = { title: 'Getting started' }
 
 Five minutes from zero to your first encrypted vault.
 
-> Short on time? `share-env init` does steps 1 and 2's setup in one command: identity, roster entry, and `.gitignore` rules. Then jump to [pushing](#2-push-your-envs).
+## 1. Set up the repo
 
-## 1. Create your key
+From your project root:
 
 ```bash
-share-env keygen
+share-env init
 ```
 
-This creates an identity at `~/.config/share-env/identity` and prints your public key:
+One command does the whole first step: creates your identity (once per machine, at `~/.config/share-env/identity`), adds you to the team roster (`.envkeys`), fixes `.gitignore` so real secrets stay out of git while the encrypted vault can be committed, and prints your public key:
 
 ```
 Your public key (safe to share anywhere):
 sepk_b0e5LGEgeNU0RvWLUanGiGwHGnsDOZYhXEBeH2SSsWc
 ```
 
-The private half never leaves your machine. The `sepk_...` public half is like an email address: you can post it anywhere. If you run `keygen` inside a repo, it offers to add you to the team roster (`.envkeys`) right away.
+The private half never leaves your machine. The `sepk_...` public half is like an email address: you can post it anywhere. Just need a key without the repo setup (say, on a second machine)? That's `share-env keygen`.
 
 ## 2. Push your envs
 

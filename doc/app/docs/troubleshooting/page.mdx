@@ -9,7 +9,7 @@ The errors you might hit, what they actually mean, and the fix.
 You've never run `keygen` on this machine. Fix:
 
 ```bash
-share-env keygen
+share-env init   # or share-env keygen for just the key
 ```
 
 Then send the printed public key to a teammate, have them `keys add` you and `push`, then `git pull && share-env pull`.

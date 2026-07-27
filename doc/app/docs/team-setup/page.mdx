@@ -17,10 +17,11 @@ Each teammate sends you their printed `sepk_...` public key however they like. T
 
 ## Phase 2: build the roster and push
 
-Just you, once:
+Just you, once. `init` sets up your identity, your roster entry, and the `.gitignore` rules in one go, then you add everyone's keys:
 
 ```bash
 cd ~/work/my-app
+share-env init
 share-env keys add sara  sepk_saraskey...
 share-env keys add dawit sepk_dawitskey...
 share-env keys add hana  sepk_hanaskey...
@@ -74,4 +75,4 @@ From that push on her key opens nothing. Rotation matters because old commits re
 
 ## Onboarding via pull request
 
-Instead of collecting keys in chat, teammates can add themselves to `.envkeys` in a PR. You review, merge, run `share-env push`, and the PR history becomes your audit log of who got access and when. `push` will still ask you to confirm any key that was not added on your machine; see the [security model](/docs/security).
+Instead of collecting keys in chat, teammates can add themselves to `.envkeys` in a PR — running `share-env init` in their clone does exactly that (plus creates their key if they don't have one). You review, merge, run `share-env push`, and the PR history becomes your audit log of who got access and when. `push` will still ask you to confirm any key that was not added on your machine; see the [security model](/docs/security).

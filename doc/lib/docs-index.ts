@@ -37,7 +37,7 @@ export const docs: DocPage[] = [
     slug: 'getting-started',
     title: 'Getting started',
     description: 'Create your key, push your first vault, and pull it on another machine.',
-    keywords: 'quickstart keygen push pull first vault tutorial',
+    keywords: 'quickstart init keygen push pull first vault tutorial setup',
     icon: Rocket,
   },
   {
@@ -51,7 +51,7 @@ export const docs: DocPage[] = [
     slug: 'commands',
     title: 'Commands',
     description: 'Every command and flag: push, pull, status, keygen, and keys.',
-    keywords: 'cli reference push pull status keygen keys flags options aliases',
+    keywords: 'cli reference init push pull status keygen keys flags options aliases',
     icon: Terminal,
   },
   {

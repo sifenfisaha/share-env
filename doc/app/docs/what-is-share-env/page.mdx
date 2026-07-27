@@ -37,7 +37,7 @@ The mental model: every teammate has a personal **padlock and key**. The padlock
 
 ### 1. Everyone creates an identity, once
 
-`share-env keygen` generates an X25519 keypair. The private half lands in `~/.config/share-env/identity` and stays there forever. The public half is a short `sepk_...` string that teammates paste into `.envkeys`, the plain-text roster committed to the repo:
+`share-env keygen` generates an X25519 keypair (or run `share-env init`, which does this plus the roster and `.gitignore` setup in one command). The private half lands in `~/.config/share-env/identity` and stays there forever. The public half is a short `sepk_...` string that teammates paste into `.envkeys`, the plain-text roster committed to the repo:
 
 ```
 # who can decrypt the next share-env push
