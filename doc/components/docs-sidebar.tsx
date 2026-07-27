@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { PanelLeft, X } from 'lucide-react'
@@ -78,13 +79,14 @@ export function MobileDocsNav() {
         <span className="truncate">{current ? current.title : 'Documentation'}</span>
       </button>
 
-      {open && (
-        <div
-          className="modal-overlay fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setOpen(false)
-          }}
-        >
+      {open &&
+        createPortal(
+          <div
+            className="modal-overlay fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setOpen(false)
+            }}
+          >
           <aside
             role="dialog"
             aria-modal="true"
@@ -105,8 +107,9 @@ export function MobileDocsNav() {
             </div>
             <NavList onNavigate={() => setOpen(false)} />
           </aside>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   )
 }
