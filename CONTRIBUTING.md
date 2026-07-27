@@ -54,6 +54,7 @@ src/
     crypto.ts        v2 envelope crypto (X25519+HKDF+AES-GCM) and v1 scrypt mode
     identity.ts      keypair generation, encoding, identity file handling
     recipients.ts    the .envkeys roster format
+    trust.ts         per-machine approved-keys store (.git/share-env-trusted-keys)
     vault.ts         .envault file format (v1 and v2)
     open.ts          decrypt-any-vault helper used by pull and status
     scan.ts          finding .env files in the repo

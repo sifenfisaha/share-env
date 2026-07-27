@@ -11,6 +11,7 @@ import {
   saveIdentity,
 } from '../lib/identity.js'
 import { addRecipient, ENVKEYS_FILENAME, readRecipients } from '../lib/recipients.js'
+import { trustKeys } from '../lib/trust.js'
 
 function defaultName(): string {
   try {
@@ -65,6 +66,7 @@ export async function keygenCommand(opts: { force?: boolean; name?: string }): P
       const already = readRecipients(root).some((r) => r.publicKey === identity.publicKey)
       if (!already) {
         addRecipient(root, name, identity.publicKey)
+        trustKeys(root, [identity.publicKey])
         p.log.success(`Added ${pc.cyan(name)} to ${ENVKEYS_FILENAME} — commit it along with your next push.`)
       }
     }

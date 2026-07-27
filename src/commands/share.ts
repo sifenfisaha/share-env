@@ -6,9 +6,11 @@ import { parseEnv } from '../lib/env.js'
 import { findRepoRoot, isIgnored, trackedFiles } from '../lib/git.js'
 import { publicKeyFromSecret, resolveSecretKey } from '../lib/identity.js'
 import { askNewPassphrase } from '../lib/passphrase.js'
-import { ENVKEYS_FILENAME, readRecipients } from '../lib/recipients.js'
+import { shorten } from '../lib/open.js'
+import { ENVKEYS_FILENAME, readRecipients, type Recipient } from '../lib/recipients.js'
 import { findEnvFiles } from '../lib/scan.js'
-import { VAULT_FILENAME, writeVault, writeVaultForRecipients } from '../lib/vault.js'
+import { readTrustedKeys, trustKeys } from '../lib/trust.js'
+import { readEnvelope, VAULT_FILENAME, vaultExists, writeVault, writeVaultForRecipients } from '../lib/vault.js'
 import { plural } from '../lib/ui.js'
 
 export async function shareCommand(opts: { yes?: boolean; passphrase?: boolean }): Promise<void> {
@@ -68,6 +70,7 @@ export async function shareCommand(opts: { yes?: boolean; passphrase?: boolean }
           `Add yourself:  ${pc.cyan(`share-env keys add <your-name> ${publicKeyFromSecret(secretKey)}`)}`
       )
     }
+    await verifyNewRecipients(root, recipients, opts)
   }
 
   if (!opts.yes) {
@@ -89,6 +92,8 @@ export async function shareCommand(opts: { yes?: boolean; passphrase?: boolean }
     s2.start('Encrypting (X25519 envelope + AES-256-GCM)')
     writeVaultForRecipients(root, { files: contents }, recipients)
     s2.stop(`Wrote ${pc.cyan(VAULT_FILENAME)} for ${plural(recipients.length, 'recipient key')}`)
+    // Everything we just encrypted to is now approved on this machine.
+    trustKeys(root, recipients.map((r) => r.publicKey))
   }
 
   for (const f of [VAULT_FILENAME, ENVKEYS_FILENAME]) {
@@ -102,4 +107,55 @@ export async function shareCommand(opts: { yes?: boolean; passphrase?: boolean }
     `Now commit and push:  ${pc.cyan(`git add ${commitFiles} && git commit -m "update envs"`)}\n` +
       `   Your teammate runs ${pc.cyan('share-env pull')} after pulling.`
   )
+}
+
+/**
+ * Flag roster keys that were never approved on this machine (added by hand,
+ * confirmed at a previous push, or present in the existing vault). Defends
+ * against a stranger slipping their key into .envkeys via an unreviewed PR.
+ */
+async function verifyNewRecipients(
+  root: string,
+  recipients: Recipient[],
+  opts: { yes?: boolean }
+): Promise<void> {
+  let baseline = readTrustedKeys(root)
+  if (baseline.size === 0 && vaultExists(root)) {
+    try {
+      const prev = readEnvelope(root)
+      if (prev.version === 2) baseline = new Set(prev.recipients.map((r) => r.publicKey))
+    } catch {
+      // unreadable vault: fall through with an empty baseline
+    }
+  }
+  if (baseline.size === 0) return // first push: nothing to compare against
+
+  const fresh = recipients.filter((r) => !baseline.has(r.publicKey))
+  if (fresh.length === 0) return
+
+  p.log.warn(
+    `${pc.yellow(`${plural(fresh.length, 'key')} in ${ENVKEYS_FILENAME} ${fresh.length === 1 ? 'was' : 'were'} not added on this machine:`)}\n` +
+      fresh.map((r) => `  ${pc.cyan(r.name)}  ${pc.dim(shorten(r.publicKey))}`).join('\n') +
+      `\nIf you did not approve ${fresh.length === 1 ? 'this key' : 'these keys'} (e.g. via a reviewed PR), do not encrypt to ${fresh.length === 1 ? 'it' : 'them'}.`
+  )
+
+  if (opts.yes) {
+    p.log.warn(`Proceeding because ${pc.cyan('--yes')} was passed.`)
+    return
+  }
+  if (!process.stdout.isTTY) {
+    p.cancel(
+      `Refusing to encrypt to unapproved keys in a non-interactive run.\n` +
+        `   Approve them first with ${pc.cyan('share-env keys add <name> <pubkey>')}, remove them with ${pc.cyan('share-env keys remove <name>')}, or pass ${pc.cyan('--yes')}.`
+    )
+    process.exit(1)
+  }
+  const ok = await p.confirm({
+    message: `Encrypt to ${fresh.length === 1 ? 'this new key' : `these ${fresh.length} new keys`}?`,
+    initialValue: false,
+  })
+  if (p.isCancel(ok) || !ok) {
+    p.cancel(`Push cancelled. Remove unexpected keys with ${pc.cyan('share-env keys remove <name>')}.`)
+    process.exit(1)
+  }
 }

@@ -32,6 +32,7 @@ Recipient-key vaults (v2, the default):
 - Private identity keys live at `~/.config/share-env/identity` with mode 600 and are never written to the repo
 - The envelope reveals only recipient names and public keys; all file paths and contents live inside the encrypted payload
 - Known accepted property: vaults in git history remain decryptable by keys that were recipients at the time; offboarding therefore requires rotating the underlying secrets, as documented in the README
+- Roster-injection defense: `push` compares `.envkeys` against a per-machine trust store kept inside `.git/` (never committed, so unreachable by pull requests) and requires explicit confirmation before encrypting to a key that was not approved on that machine; non-interactive runs refuse unapproved keys unless `--yes` is passed
 
 Passphrase vaults (v1, legacy `--passphrase` mode):
 

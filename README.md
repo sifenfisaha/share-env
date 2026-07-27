@@ -117,6 +117,19 @@ A person can have multiple keys (laptop + desktop): just `keys add` them under t
 
 Lost key? Run `keygen --force` for a fresh identity, get re-added, done.
 
+### What if a stranger adds themselves to `.envkeys`?
+
+By itself, nothing: the roster is an instruction list for the *next* push, and secrets only reach a key when a teammate who already has them runs `push`. On top of that, `push` keeps a local record (inside `.git/`, never committed, unreachable by any PR) of the keys approved on your machine. Any roster key that arrived some other way triggers an explicit confirmation:
+
+```
+▲  1 key in .envkeys was not added on this machine:
+     mallory  sepk_H5DODcjon…
+   If you did not approve this key (e.g. via a reviewed PR), do not encrypt to it.
+◆  Encrypt to this new key?  ○ no
+```
+
+Keys you add via `keys add` or `keygen` are approved automatically, so normal onboarding never prompts. Non-interactive runs refuse unapproved keys unless you pass `--yes`. Still: review PRs that touch `.envkeys` like you review PRs that touch CI credentials.
+
 ### Everyday use
 
 - Someone changed a secret? They run `share-env push`, commit, push. Everyone else pulls and runs `share-env pull`.

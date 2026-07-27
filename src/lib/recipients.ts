@@ -44,19 +44,20 @@ export function addRecipient(root: string, name: string, publicKey: string): voi
   writeFileSync(path, content, 'utf8')
 }
 
-/** Remove every key belonging to `name`. Returns how many entries were removed. */
-export function removeRecipient(root: string, name: string): number {
+/** Remove every key belonging to `name`. Returns the removed entries. */
+export function removeRecipient(root: string, name: string): Recipient[] {
   const path = envkeysPath(root)
-  if (!existsSync(path)) return 0
-  let removed = 0
+  if (!existsSync(path)) return []
+  const removed: Recipient[] = []
   const kept = readFileSync(path, 'utf8')
     .split('\n')
     .filter((line) => {
       const trimmed = line.trim()
       if (!trimmed || trimmed.startsWith('#')) return true
-      const entryName = trimmed.slice(0, trimmed.indexOf(':')).trim()
+      const sep = trimmed.indexOf(':')
+      const entryName = trimmed.slice(0, sep).trim()
       if (entryName === name) {
-        removed++
+        removed.push({ name: entryName, publicKey: trimmed.slice(sep + 1).trim() })
         return false
       }
       return true
