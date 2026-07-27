@@ -122,6 +122,74 @@ Lost key? Run `keygen --force` for a fresh identity, get re-added, done.
 - Someone changed a secret? They run `share-env push`, commit, push. Everyone else pulls and runs `share-env pull`.
 - `share-env status` shows each env file as ✓ in sync, ✗ differs, local-only, or missing locally.
 
+## Team setup walkthrough
+
+A concrete example: you plus five teammates (Sara, Dawit, Hana, Yonas, and Lidya) on a repo called `my-app`.
+
+### Phase 1: everyone installs and creates a key (each person, once ever)
+
+All six of you run this on your own machines:
+
+```bash
+npm install -g @sifenfisaha/share-env
+share-env keygen
+```
+
+`keygen` prints a public key like `sepk_b0e5LGEg...`. Each teammate sends theirs to you however they like (the group chat is fine, it is a public key). If you run `keygen` inside the repo, it offers to add you to `.envkeys` right away.
+
+### Phase 2: build the roster and push (just you, once)
+
+```bash
+cd ~/work/my-app
+share-env keys add sara  sepk_saraskey...
+share-env keys add dawit sepk_dawitskey...
+share-env keys add hana  sepk_hanaskey...
+share-env keys add yonas sepk_yonaskey...
+share-env keys add lidya sepk_lidyaskey...
+
+share-env keys       # should list all six names, with "(you)" next to yours
+
+share-env push
+git add .envault .envkeys
+git commit -m "share envs with the team"
+git push
+```
+
+### Phase 3: everyone pulls (each teammate, ~10 seconds)
+
+```bash
+cd my-app
+git pull
+share-env pull
+```
+
+No passphrase to type. Every `.env` file appears exactly where it belongs, even in subfolders. If Hana already had her own `.env` with different values, she gets the per-variable diff and picks what to keep; her old file is saved as `.env.bak` either way.
+
+### Daily life after setup
+
+- Dawit adds a new API key to `.env`: he runs `share-env push`, commits `.envault`, pushes. Everyone else does `git pull && share-env pull`.
+- Anyone unsure if they are current runs `share-env status`.
+- Yonas gets a second laptop: he runs `keygen` there, and anyone adds it with `share-env keys add yonas sepk_newkey...` then pushes. The same name twice is fine.
+
+### When someone leaves
+
+Say Lidya leaves the company:
+
+```bash
+share-env keys remove lidya
+```
+
+Then rotate the real secrets she knew (new database password, new API keys) in your `.env` files, and:
+
+```bash
+share-env push
+git add .envault .envkeys && git commit -m "offboard lidya" && git push
+```
+
+From that push on, her key opens nothing. The rotation step matters because old commits in git history are still readable to her old key; new secrets make that history worthless.
+
+Tip for smooth onboarding: instead of collecting keys in chat, teammates can add themselves to `.envkeys` in a PR (it is a plain text file). You merge the PR, run `share-env push`, and the PR history doubles as your audit log of who got access when.
+
 ## Legacy passphrase mode
 
 Prefer a single shared passphrase (e.g. solo projects)? It's still there:
